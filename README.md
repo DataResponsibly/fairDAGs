@@ -1,2 +1,2 @@
 # fairDAGs
-This is the repository of code for fairDAGs. 
+This is the code repository for fairDAGs. 
