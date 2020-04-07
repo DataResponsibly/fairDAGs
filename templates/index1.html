@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Fairness-Aware Instrumentation DAG</title>
+
+    <meta name="description" content="Fairness-Aware Instrumentation DAG">
+    <meta name="author" content="Biao Huang">
+
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/scripts.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+
+
+  <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+      <p>
+        <strong>Welcome!</strong> {{ name }} from {{ org }}<a class="btn" href="/logout">Logout</a>
+
+			<div class="jumbotron">
+				<h2>
+					Fairness-Aware Instrumentation DAG
+				</h2>
+				<p>
+					DEMO Version
+				</p>
+				<p>
+					<a class="btn btn-primary btn-large" href="https://github.com/KeYang0923/fairInstrumentation/tree/bh1918">Open in Github</a>
+				</p>
+			</div>
+    </div>
+
+			<div class="col-md-12">
+				<div class="≈">
+          <div class="row">
+              <div class="col-md-6">
+  							 <h4 class="text-center">Raw Codes Shown HERE</h4>
+                 <div class="card h-100 example-1 scrollbar-deep-purple">
+                   <div class="card-body">
+                     <!-- <pre class="prettyprint lang-py"> -->
+{{ code|safe }}
+     <!-- </pre> -->
+            </div>
+            </div>
+          </div>
+					<!-- <div class="row"> -->
+						<div class="col-md-6">
+							 <h4 class="text-center">DAG Shown HERE</h4>
+
+               <div class="card h-100 example-1 scrollbar-deep-purple">
+                 <div class="card-body">
+               <!-- svg here -->
+               {% block content %}
+               {% endblock %}
+               <!-- svg here -->
+              </div>
+              </div>
+						</div>
+					</div>
+          <br/>
+          <hr>
+          <br/>
+
+				<div class="col-md-12">
+          <h4 class="text-center">Histogram Shown HERE</h4>
+          <br/>
+          <table class="table table-striped">
+          <div class="col-md-12">
+          <div id="myDiv">
+            <script>
+            var graphs = {{plots | safe}};
+            Plotly.newPlot('myDiv', graphs,{});
+            </script>
+          </div>
+          </div>
+				</div>
+
+        <div class="col-md-12">
+          <h4 class="text-center">Log Shown HERE</h4>
+          <br/>
+          {% for table in tables %}
+                <b>inspecting</b> <font color={{colors[loop.index-1]}}> {{ titles[loop.index-1] }}</font> <b>{{ labels[loop.index-1] }}</b>
+                <br/>
+                {{ table|safe }}
+                <br/>
+                <br/>
+          {% endfor %}
+        </div>
+
+		</div>
+	</div>
+</div>
+  </body>
+</html>

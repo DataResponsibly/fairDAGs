@@ -1,0 +1,21 @@
+// preprocessing_pipeline
+digraph {
+	data [label=<<font POINT-SIZE="14"><b>data</b></font><br/><font POINT-SIZE="10">read_csv</font>> color="#851CD2" fontcolor="#851CD2" href="{{url_for('home', type=1784405182961287533665784289482110639094747442902220386171452802209713635574709774865947495358828917123321909995405072984423293284)}}"]
+	education__impute [label=<<font POINT-SIZE="14"><b>education__impute</b></font><br/><font POINT-SIZE="10">SimpleImputer</font>> color="#5BA70B" fontcolor="#5BA70B" href="{{url_for('home', type=2804989317031255088541154771656630800566289042529274127461)}}"]
+	data -> education__impute
+	education__encode [label=<<font POINT-SIZE="14"><b>education__encode</b></font><br/><font POINT-SIZE="10">OneHotEncoder</font>> color="#FD164C" fontcolor="#FD164C" href="{{url_for('home', type=2804983321877343834560744523971287426967505533951943205989)}}"]
+	education__impute -> education__encode
+	workclass__impute [label=<<font POINT-SIZE="14"><b>workclass__impute</b></font><br/><font POINT-SIZE="10">SimpleImputer</font>> color="#2C71E6" fontcolor="#2C71E6" href="{{url_for('home', type=2804989317031255088541154771656630800658808732686790848375)}}"]
+	data -> workclass__impute
+	workclass__encode [label=<<font POINT-SIZE="14"><b>workclass__encode</b></font><br/><font POINT-SIZE="10">OneHotEncoder</font>> color="#1BCB1D" fontcolor="#1BCB1D" href="{{url_for('home', type=2804983321877343834560744523971287427060025224109459926903)}}"]
+	workclass__impute -> workclass__encode
+	age [label=<<font POINT-SIZE="14"><b>age</b></font><br/><font POINT-SIZE="10">StandardScaler</font>> color="#169B43" fontcolor="#169B43" href="{{url_for('home', type=2551120173458070662744608260310443926770509665)}}"]
+	data -> age
+	"hours-per-week" [label=<<font POINT-SIZE="14"><b>hours-per-week</b></font><br/><font POINT-SIZE="10">StandardScaler</font>> color="#8067E3" fontcolor="#8067E3" href="{{url_for('home', type=789533451938102534376245469086271046335388363348063413310934233776484200)}}"]
+	data -> "hours-per-week"
+	classifier [label=<<font POINT-SIZE="14"><b>classifier</b></font><br/><font POINT-SIZE="10">DecisionTreeClassifier</font>> color="#CCBDCC" fontcolor="#CCBDCC" href="{{url_for('home', type=2804985179480294331185063494415449153744646865719765786463)}}"]
+	education__encode -> classifier
+	workclass__encode -> classifier
+	age -> classifier
+	"hours-per-week" -> classifier
+}
