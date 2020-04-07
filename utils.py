@@ -57,7 +57,6 @@ def plotly_histogram(res, title, ind, pos_group):
     ys_pos = np.array(ys_pos).reshape(2, int(len(ys_pos)/2)).T
     # ys_neg = [ys_neg[i*len(primary_key):(i + 1) * len(primary_key)] for i in range((len(ys_neg) + len(primary_key) - 1) // len(primary_key))]
     ys_neg = np.array(ys_neg).reshape(2, int(len(ys_neg)/2)).T
-
     if ind:
         bars = [go.Bar(name=name, x=primary_key, y=y, legendgroup=str(i), marker_color = colors[i]) for i, (name,y) in enumerate(zip(names, ys_pos))]
         for i, (name,y) in enumerate(zip(names, ys_neg)):
@@ -69,6 +68,18 @@ def plotly_histogram(res, title, ind, pos_group):
 
     return bars, len(ys_pos)
 
+def plotly_histogram_perform(data, target, title):
+    colors = px.colors.qualitative.Plotly
+    primary_key = remove_list_dup([item[0] for item in data.keys()])
+    names = remove_list_dup([item[1] for item in data.keys()])
+    target_data = []
+    for value in data.values():
+        target_data.append(value[target])
+    target_data = np.array(target_data).reshape(2, int(len(target_data)/2)).T
+
+    bars = [go.Bar(name=name, x=primary_key, y=y, legendgroup=str(i), showlegend=False, marker_color = colors[i]) for i, (name,y) in enumerate(zip(names, target_data))]
+
+    return bars
 
 def pipeline_to_dataflow_graph(pipeline):
     '''

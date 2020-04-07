@@ -434,13 +434,11 @@ def sklearn_to_dataflow_graph(pipeline, log_list, parent_vertices=[]):
             node.parent_vertices = parent_vertices
     return graph, log_list
 
-def visualize(nested_graph, log_list, save_path):
+def visualize(nested_graph, log_list, save_path, dag_save):
     no_nodes = len(log_list)
-    rand_rgb = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(no_nodes)]
-    # rand_rgb = px.colors.cyclical.HSV
-    # rand_rgb = ['#191970', '#ff0000', '#006400', '#32cd32', '#ffd700', '#9932cc', '#ff69b4', '#8b4513', '#00ced1', '#d2691e']*4
+    rand_rgb = ['#191970', '#ff0000', '#006400', '#32cd32', '#ffd700', '#9932cc', '#ff69b4', '#8b4513', '#00ced1', '#d2691e'] if no_nodes <= 10 else ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(no_nodes)]
     dot = Digraph(comment='preprocessing_pipeline')
-    dot.format = 'pdf'
+    dot.format = dag_save
     previous = {}
     for i, node in enumerate(nested_graph):
         node_name = node.name.replace('>=', '&ge;').replace('<=', '&le;')[:50] +' ...' if len(node.name)>40 else node.name.replace('>=', '&ge;').replace('<=', '&le;')
@@ -460,7 +458,7 @@ def visualize(nested_graph, log_list, save_path):
 # ## Combine and make Func Wrapper
 
 
-def tracer(cat_col, numerical_col, sensi_atts, target_name, training = True, save_path = ''):
+def tracer(cat_col, numerical_col, sensi_atts, target_name, training = True, save_path = '', dag_save = 'pdf'):
     def wrapper(func):
         def call(*args, **kwargs):
             if not os.path.exists(save_path):
@@ -488,7 +486,7 @@ def tracer(cat_col, numerical_col, sensi_atts, target_name, training = True, sav
             pipeline = func(*args, **kwargs)
             sklearn_graph, log_list = sklearn_to_dataflow_graph(pipeline, log_list, parent_vertices)
             pd_graph.extend(sklearn_graph)
-            _, rand_rgb = visualize(pd_graph, log_list, save_path)
+            _, rand_rgb = visualize(pd_graph, log_list, save_path, dag_save)
             colors = dict(zip(log_list, rand_rgb))
             if training:
                 pickle.dump(colors, open(save_path+"/checkpoints/rand_color_train.p", "wb"))

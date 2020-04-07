@@ -38,18 +38,18 @@
 					</span>
 
 
-					<div class="wrap-input100 validate-input m-b-16" data-validate = "Username is required">
+					<div class="wrap-input100 m-b-16" data-validate = "Username is required">
 						<input class="input100" type="text" name="name" placeholder="FULL NAME" value="{{ request.form.name }}">
 						<span class="focus-input100"></span>
 					</div>
 
-
-					<div class="wrap-input100 validate-input m-b-16" data-validate = "Organization is required">
+<!-- class="wrap-input100 m-b-16" -->
+					<div class="wrap-input100 m-b-16" data-validate = "Organization is required">
 						<input class="input100" type="text" name="organization" placeholder="ORGANIZATION" value="{{ request.form.organization }}">
 						<span class="focus-input100"></span>
 					</div>
 
-					<div class="wrap-input100 validate-input m-b-16" data-validate = "Code is required">
+					<div class="wrap-input100 m-b-16" data-validate = "Code is required">
 						<textarea class="input100" name="code" placeholder="CODE HERE" value="{{ request.form.code }}" ></textarea>
 					</div>
 
@@ -59,12 +59,22 @@
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="cat_target" placeholder="Categorical attributes HERE, split by ','" value="{{ request.form.cat_target }}">
+						<input class="input100" type="text" name="cat_target" placeholder="Sensible attributes HERE, split by ','" value="{{ request.form.cat_target }}">
 						<span class="focus-input100"></span>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
 						<input class="input100" type="text" name="num_target" placeholder="Numerical attributes HERE, split by ','" value="{{ request.form.num_target }}">
+						<span class="focus-input100"></span>
+					</div>
+
+					<div class="wrap-input100 m-b-16">
+						<input class="input100" type="text" name="path" placeholder="save path specified HERE" value="{{ request.form.path }}">
+						<span class="focus-input100"></span>
+					</div>
+
+					<div class="wrap-input100 m-b-16">
+						<input class="input100" type="text" name="perform_target" placeholder="PR, TPR, TNR, FPR or FNR" value="{{ request.form.perform_target }}">
 						<span class="focus-input100"></span>
 					</div>
 

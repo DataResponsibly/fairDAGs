@@ -74,16 +74,21 @@ def create_hist_sub_plot(to_plot, plt_titles, pos_group):
     # no_rows_plot = no_rows//2 if no_rows%2==0 else no_rows//2+1
 
     fig = make_subplots(
-        rows=no_rows, cols=2, subplot_titles=np.array(plt_titles).repeat(2).tolist()
+        rows=no_rows, cols=2, subplot_titles=np.array(plt_titles[:-1]).repeat(2).tolist()+[plt_titles[-1]]
     )
 
     for i, res in enumerate(to_plot):
-        bar_list, No_col = plotly_histogram(res, plt_titles[i], i==0, pos_group)
-        for j, bar_trace in enumerate(bar_list):
-            if j < No_col:
-                fig.add_trace(bar_trace, row=i+1, col=1)
-            else:
-                fig.add_trace(bar_trace, row=i+1, col=2)
+        if type(res) == tuple:
+            bar_list = plotly_histogram_perform(data = res[0], target = res[1], title = plt_titles[i])
+            for bar_trace in bar_list:
+                fig.add_trace(bar_trace, row=i+1, col = 1)
+        else:
+            bar_list, No_col = plotly_histogram(res, plt_titles[i], i==0, pos_group)
+            for j, bar_trace in enumerate(bar_list):
+                if j < No_col:
+                    fig.add_trace(bar_trace, row=i+1, col=1)
+                else:
+                    fig.add_trace(bar_trace, row=i+1, col=2)
 
     for i in range(2 * no_rows):
         fig.update_yaxes(title_text='Positive' if i%2==0 else 'Negative', row=i//2+1, col=i%2+1)
@@ -116,18 +121,14 @@ def change_code_color(colors, titles, code):
         elif line=='\r':
             code_list[idx] = f"<p></p>"
         for i, title in enumerate(titles):
-            if "ColTrans__" in title:
-                if title.replace("ColTrans__", "").split("__")[0] in line:
-                    col_to_change = title.replace("ColTrans__", "").split("__")[0]
-
-                    code_list[idx] = code_list[idx].replace(col_to_change, f"<font color = \"{colors[i]}\">{col_to_change}</font>")
-                # if len(title.replace("ColTrans__", "").split("__"))>1 and title.replace("ColTrans__", "").split("__")[-1] in line:
-                #     code_list[idx] = f"<font color=\"{colors[i]}\">{code_list[idx]}</font>"
-
+            if '__' not in title or title.startswith('__'):
+                if title.strip("__") in line:
+                    code_list[idx] = f"<font color=\"{colors[i]}\">{code_list[idx]}</font>"
             else:
-                for sep in title.split("__"):
-                    if sep in line:
-                        code_list[idx] = f"<font color=\"{colors[i]}\">{code_list[idx]}</font>"
+                # for sep in title.split("__"):
+                    # if sep in line and sep:
+                if title.split('__')[-2] in line:
+                    code_list[idx] = f"{code_list[idx].split(title.split('__')[-2])[0]}<font color=\"{colors[i]}\">{title.split('__')[-2]}</font>{code_list[idx].split(title.split('__')[-2])[-1]}"
 
         code = "".join(code_list)
 
@@ -182,34 +183,61 @@ def login_required(f):
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     error = None
+
+    # set default_value here
     if request.method == 'POST':
         global name
-        name = request.form['name']
+        name = request.form['name'] if request.form['name'] else 'Guest'
         global organization
-        organization = request.form['organization']
+        organization = request.form['organization'] if request.form['organization'] else 'Unknown'
         global code
-        code = request.form['code']
+        code = """def adult_pipeline_easy(f_path = 'data/adult_train.csv'):
+
+    raw_data = pd.read_csv(f_path, na_values='?', index_col=0)
+
+    data = raw_data.dropna()
+
+    labels = label_binarize(data['income-per-year'], ['>50K', '<=50K'])
+
+    feature_transformation = ColumnTransformer(transformers=[
+        ('categorical', OneHotEncoder(handle_unknown='ignore'), ['education', 'workclass']),
+        ('numeric', StandardScaler(), ['age', 'hours-per-week'])
+    ])
+
+
+    income_pipeline = Pipeline([
+        ('features', feature_transformation),
+        ('classifier', DecisionTreeClassifier())])
+
+    return income_pipeline""" if not request.form['code'] else request.form['code']
         global target_name, pos_group
-        target_name, pos_group = list(map(lambda x: x.strip(), request.form['target_name'].split(',')))
+        target_name, pos_group = list(map(lambda x: x.strip(), request.form['target_name'].split(','))) if request.form['target_name'] else ("income-per-year", ">50K")
         global cat_target
-        cat_target = list(map(lambda x: x.strip(), request.form['cat_target'].split(',')))
+        cat_target = list(map(lambda x: x.strip(), request.form['cat_target'].split(','))) if request.form['cat_target'] else ['sex', 'race']
         global num_target
-        num_target = list(map(lambda x: x.strip(), request.form['num_target'].split(',')))
+        num_target = list(map(lambda x: x.strip(), request.form['num_target'].split(','))) if request.form['num_target'] else ['age', 'hours-per-week']
+        global save_path
+        save_path = 'case_outputs/'+request.form['path'] if request.form['path'] else 'case_outputs/adult_easy'
+        global perform_target
+        perform_target = request.form['perform_target'] if request.form['perform_target'] else 'PR'
+
         session['logged_in'] = True
         function_title = code.split('(')[0].replace('def ','')+"()"
         with open('saved_function.py', 'w+') as f:
             f.write(essentials)
-            f.write(f"""@tracer(cat_col = {cat_target}, numerical_col = {num_target}, sensi_atts={cat_target}, target_name = \"{target_name}\")\n{code}\n""")
+            f.write(f"""@tracer(cat_col = {cat_target}, numerical_col = {num_target}, sensi_atts={cat_target}, target_name = \"{target_name}\", training=True, save_path=\"{save_path}\", dag_save=\"svg\")\n{code}\n""")
             f.write(f"pipeline = {function_title}")
         os.system("python saved_function.py")
         global cache
         cache = []
         global log_dict
-        log_dict = pickle.load(open("log_dict.p", 'rb'))
+        log_dict = pickle.load(open(save_path+"/checkpoints/log_dict_train.p", 'rb'))
         global rand_rgb
-        rand_rgb = pickle.load(open("rand_color.p", 'rb'))
+        rand_rgb = pickle.load(open(save_path+"/checkpoints/rand_color_train.p", 'rb'))
         global plot_dict
-        plot_dict = pickle.load(open("plot_dict.p", 'rb'))
+        plot_dict = pickle.load(open(save_path+"/checkpoints/plot_dict_train.p", 'rb'))
+        global target_df
+        target_df = pickle.load(open(save_path+"/checkpoints/target_df_train.p", 'rb'))
 
         flash('You were just logged in')
         return redirect(url_for('home'))
@@ -219,7 +247,7 @@ def login():
 @login_required
 def home():
     # print("code"+code)
-    img = 'pipeline.gv.svg'
+    img = save_path + "/DAG/pipeline.svg"
     with open(img, 'r') as content:
         svg = content.read()
     with open('templates/index.html', 'w+') as f:
@@ -239,10 +267,20 @@ def home():
     code_with_color = ""
     tables_to_display, titles, labels, code_titles, plt_xs, plt_ys, plt_titles, plt_xas, plt_yas, plot_log_changes = [], [], [], [], [], [], [], [], [], []
     for status in cache:
-        to_plot.append(sort_dict_key(plot_dict[int(status)]))
+        if 'Classifier' in int_to_string(int(status)):
+            label_inverse = {1: '<=50K', 0:'>50K'}
+            target_df[target_name].replace(label_inverse, inplace = True)
+            target_df['pred_'+target_name].replace(label_inverse, inplace = True)
+            plt_titles.insert(0, 'Performance Label')
+            to_plot.insert(0, (get_performance_label(target_df, cat_target, target_name, pos_group), perform_target))
+            to_plot.append(static_label(target_df, cat_target, target_name))
+            plot_log_changes.append(pd.DataFrame(static_label(target_df, cat_target, target_name)))
+        else:
+            to_plot.append(sort_dict_key(plot_dict[int(status)]))
+            plot_log_changes.append(pd.DataFrame(sort_dict_key(plot_dict[int(status)])))
         if int(status) in log_dict.keys():
             temp_table = log_dict[int(status)]
-            plot_log_changes.append(pd.DataFrame(sort_dict_key(plot_dict[int(status)])))
+
             if len(plot_log_changes) == 1:
                 tables_to_display.append('No changes')
             else:
@@ -286,7 +324,6 @@ def home():
                     # plt_titles.append(int_to_string(int(status))+' Change on '+str(temp_table[key].index[0]))
                     plt_titles.append('INSPECTING ' + int_to_string(int(status)))
         else:
-            plot_log_changes.append(pd.DataFrame(sort_dict_key(plot_dict[int(status)])))
 
             if len(plot_log_changes) == 1:
                 tables_to_display.append('No changes')
