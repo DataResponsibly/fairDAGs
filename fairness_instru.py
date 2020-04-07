@@ -461,6 +461,8 @@ def visualize(nested_graph, log_list, save_path, dag_save):
 def tracer(cat_col, numerical_col, sensi_atts, target_name, training = True, save_path = '', dag_save = 'pdf'):
     def wrapper(func):
         def call(*args, **kwargs):
+            if not os.path.exists('case_outputs'):
+                os.mkdir('case_outputs')
             if not os.path.exists(save_path):
                 os.mkdir(save_path)
             if not os.path.exists(save_path+'/checkpoints'):

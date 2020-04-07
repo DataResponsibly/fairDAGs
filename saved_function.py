@@ -22,10 +22,11 @@ from sklearn.ensemble import RandomForestClassifier
 
 from utils import *
 from fairness_instru import *
-@tracer(cat_col = ['sex', 'race'], numerical_col = ['age', 'hours-per-week'], sensi_atts=['sex', 'race'], target_name = "income-per-year")
-def adult_pipeline_easy(f_path = 'data/adult-sample.csv'):
+@tracer(cat_col = ['sex', 'race'], numerical_col = ['age', 'hours-per-week'], sensi_atts=['sex', 'race'], target_name = "income-per-year", training=True, save_path="case_outputs/adult_easy", dag_save="svg")
+def adult_pipeline_easy(f_path = 'data/adult_train.csv'):
 
-    raw_data = pd.read_csv(f_path, na_values='?')
+    raw_data = pd.read_csv(f_path, na_values='?', index_col=0)
+
     data = raw_data.dropna()
 
     labels = label_binarize(data['income-per-year'], ['>50K', '<=50K'])
