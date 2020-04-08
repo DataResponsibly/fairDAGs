@@ -214,10 +214,10 @@ def login():
         target_name, pos_group = list(map(lambda x: x.strip(), request.form['target_name'].split(','))) if request.form['target_name'] else ("income-per-year", ">50K")
         global cat_target
         cat_target = list(map(lambda x: x.strip(), request.form['cat_target'].split(','))) if request.form['cat_target'] else ['sex', 'race']
-        global num_target
+        global num_target0
         num_target = list(map(lambda x: x.strip(), request.form['num_target'].split(','))) if request.form['num_target'] else ['age', 'hours-per-week']
         global save_path
-        save_path = 'case_outputs/'+request.form['path'] if request.form['path'] else 'case_outputs/adult_easy'
+        save_path = 'case_outputs/webUI'
         global perform_target
         perform_target = request.form['perform_target'] if request.form['perform_target'] else 'PR'
 

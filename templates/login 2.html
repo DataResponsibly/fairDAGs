@@ -39,7 +39,7 @@
 
 
 					<div class="wrap-input100 m-b-16" data-validate = "Username is required">
-						<input class="input100" type="text" name="name" placeholder="FULL NAME" value="{{ request.form.name }}">
+						<input class="input100" type="text" name="name" placeholder="NAME Guest" value="{{ request.form.name }}">
 						<span class="focus-input100"></span>
 					</div>
 
@@ -50,31 +50,44 @@
 					</div>
 
 					<div class="wrap-input100 m-b-16" data-validate = "Code is required">
-						<textarea class="input100" name="code" placeholder="CODE HERE" value="{{ request.form.code }}" ></textarea>
+						<textarea class="input100" name="code" placeholder="def adult_pipeline_easy(f_path = 'data/adult_train.csv'):
+
+				    raw_data = pd.read_csv(f_path, na_values='?', index_col=0)
+
+				    data = raw_data.dropna()
+
+				    labels = label_binarize(data['income-per-year'], ['>50K', '<=50K'])
+
+				    feature_transformation = ColumnTransformer(transformers=[
+				        ('categorical', OneHotEncoder(handle_unknown='ignore'), ['education', 'workclass']),
+				        ('numeric', StandardScaler(), ['age', 'hours-per-week'])
+				    ])
+
+
+				    income_pipeline = Pipeline([
+				        ('features', feature_transformation),
+				        ('classifier', DecisionTreeClassifier())])
+
+				    return income_pipeline" value="{{ request.form.code }}" ></textarea>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="target_name" placeholder="Target_attr and Positive group defined here, split by ','" value="{{ request.form.target_name }}">
+						<input class="input100" type="text" name="target_name" placeholder="income-per-year, >50K" value="{{ request.form.target_name }}">
 						<span class="focus-input100"></span>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="cat_target" placeholder="Sensible attributes HERE, split by ','" value="{{ request.form.cat_target }}">
+						<input class="input100" type="text" name="cat_target" placeholder="sex, race" value="{{ request.form.cat_target }}">
 						<span class="focus-input100"></span>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="num_target" placeholder="Numerical attributes HERE, split by ','" value="{{ request.form.num_target }}">
+						<input class="input100" type="text" name="num_target" placeholder="age, hours-per-week" value="{{ request.form.num_target }}">
 						<span class="focus-input100"></span>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="path" placeholder="save path specified HERE" value="{{ request.form.path }}">
-						<span class="focus-input100"></span>
-					</div>
-
-					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="perform_target" placeholder="PR, TPR, TNR, FPR or FNR" value="{{ request.form.perform_target }}">
+						<input class="input100" type="text" name="perform_target" placeholder="PR" value="{{ request.form.perform_target }}">
 						<span class="focus-input100"></span>
 					</div>
 
