@@ -217,7 +217,7 @@ def login():
         global num_target0
         num_target = list(map(lambda x: x.strip(), request.form['num_target'].split(','))) if request.form['num_target'] else ['age', 'hours-per-week']
         global save_path
-        save_path = 'case_outputs/webUI'
+        save_path = 'experiments/webUI'
         global perform_target
         perform_target = request.form['perform_target'] if request.form['perform_target'] else 'PR'
 
@@ -241,7 +241,7 @@ def login():
 
         flash('You were just logged in')
         return redirect(url_for('home'))
-    return render_template("login 2.html", error = error)
+    return render_template("login_2.html", error = error)
 
 @app.route('/', methods=['GET'])
 @login_required
@@ -250,7 +250,7 @@ def home():
     img = save_path + "/DAG/pipeline.svg"
     with open(img, 'r') as content:
         svg = content.read()
-    with open('templates/index.html', 'w+') as f:
+    with open('templates/index_fairdags.html', 'w+') as f:
         f.write("{% extends 'index1.html' %}\n")
         f.write("{% block content %}\n")
         f.write(svg)
@@ -354,7 +354,7 @@ def home():
         plots = create_hist_sub_plot(to_plot[::-1], plt_titles[::-1], pos_group)
 
     code_with_color = change_code_color(corr_color, code_titles, code)
-    return render_template('index.html', svg = svg, plots = plots, tables = tables_to_display[::-1], titles = titles[::-1], labels = labels[::-1], colors = np.array(corr_color[::-1]).repeat(2).tolist(), code = code_with_color, name = name, org = organization)
+    return render_template('index_fairdags.html', svg = svg, plots = plots, tables = tables_to_display[::-1], titles = titles[::-1], labels = labels[::-1], colors = np.array(corr_color[::-1]).repeat(2).tolist(), code = code_with_color, name = name, org = organization)
 
 @app.route('/logout')
 @login_required

@@ -22,7 +22,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 from utils import *
 from fairness_instru import *
-@tracer(cat_col = ['sex', 'race'], numerical_col = ['age', 'hours-per-week'], sensi_atts=['sex', 'race'], target_name = "income-per-year", training=True, save_path="case_outputs/webUI", dag_save="svg")
+@tracer(cat_col = ['sex', 'race'], numerical_col = ['age', 'hours-per-week'], sensi_atts=['sex', 'race'], target_name = "income-per-year", training=True, save_path="experiments/webUI", dag_save="svg")
 def adult_pipeline_normal(f_path = 'data/adult_train.csv'):
     data = pd.read_csv(f_path, na_values='?', index_col=0)
 #     data = raw_data.dropna()

@@ -27,14 +27,14 @@
 	<div class="row">
 		<div class="col-md-12">
       <p>
-        <strong>Welcome!</strong> {{ name }} from {{ org }}<a class="btn" href="/logout">Logout</a>
+        <strong>Welcome!</strong> Guest X from Y University<a class="btn" href="/fairdags/login">Back to inputs</a>
 
 			<div class="jumbotron">
 				<h2>
-					Fairness-Aware Instrumentation DAG
+					Fair-DAGs (DEMO)
 				</h2>
 				<p>
-					DEMO Version
+					Click the nodes in DAG to see their labels!
 				</p>
 				<p>
 					<a class="btn btn-primary btn-large" href="https://github.com/DataResponsibly/fairDAGs">Open in Github</a>
@@ -46,7 +46,7 @@
 				<div class="≈">
           <div class="row">
               <div class="col-md-6">
-  							 <h4 class="text-center">Raw Codes Shown HERE</h4>
+  							 <h4 class="text-center">Pipeline</h4>
                  <div class="card h-100 example-1 scrollbar-deep-purple">
                    <div class="card-body">
                      <!-- <pre class="prettyprint lang-py"> -->
@@ -57,7 +57,7 @@
           </div>
 					<!-- <div class="row"> -->
 						<div class="col-md-6">
-							 <h4 class="text-center">DAG Shown HERE</h4>
+							 <h4 class="text-center">DAG</h4>
 
                <div class="card h-100 example-1 scrollbar-deep-purple">
                  <div class="card-body">
@@ -76,7 +76,7 @@
           <br/>
 
 				<div class="col-md-12">
-          <h4 class="text-center">Histogram Shown HERE</h4>
+          <h4 class="text-center">Histograms</h4>
           <br/>
           <table class="table table-striped">
           <div class="col-md-12">
@@ -90,7 +90,7 @@
 				</div>
 
         <div class="col-md-12">
-          <h4 class="text-center">Log Shown HERE</h4>
+          <h4 class="text-center">Logs</h4>
           <br/>
           {% for table in tables %}
                 <b>inspecting</b> <font color={{colors[loop.index-1]}}> {{ titles[loop.index-1] }}</font> <b>{{ labels[loop.index-1] }}</b>

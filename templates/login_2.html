@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Login V10</title>
+	<title>fair-DAGs demo</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->
@@ -34,23 +34,26 @@
 			<div class="wrap-login100 p-t-50 p-b-90">
 				<form class="login100-form validate-form flex-sb flex-w" action="" method="post">
 					<span class="login100-form-title p-b-51">
-						Login
+						fair-DAGs
 					</span>
 
 
 					<div class="wrap-input100 m-b-16" data-validate = "Username is required">
-						<input class="input100" type="text" name="name" placeholder="NAME Guest" value="{{ request.form.name }}">
+						<p> User: </p>
+						<input class="input100" type="text" name="name" placeholder="Guest X" value="{{ request.form.name }}" readonly>
 						<span class="focus-input100"></span>
 					</div>
 
 <!-- class="wrap-input100 m-b-16" -->
 					<div class="wrap-input100 m-b-16" data-validate = "Organization is required">
-						<input class="input100" type="text" name="organization" placeholder="ORGANIZATION" value="{{ request.form.organization }}">
+						<p> Organization: </p>
+						<input class="input100" type="text" name="organization" placeholder="Y University" value="{{ request.form.organization }}" readonly>
 						<span class="focus-input100"></span>
 					</div>
 
 					<div class="wrap-input100 m-b-16" data-validate = "Code is required">
-						<textarea class="input100" name="code" placeholder="def adult_pipeline_easy(f_path = 'data/adult_train.csv'):
+						<p>Pipeline: </p>
+						<textarea name="code", row="20", placeholder="def adult_pipeline_easy(f_path = 'adult.csv'):
 
 				    raw_data = pd.read_csv(f_path, na_values='?', index_col=0)
 
@@ -68,29 +71,33 @@
 				        ('features', feature_transformation),
 				        ('classifier', DecisionTreeClassifier())])
 
-				    return income_pipeline" value="{{ request.form.code }}" ></textarea>
+				    return income_pipeline" value="{{ request.form.code }}" readonly></textarea>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="target_name" placeholder="income-per-year, >50K" value="{{ request.form.target_name }}">
+						<p>Target: </p>
+						<input class="input100" type="text" name="target_name" placeholder="income-per-year, >50K" value="{{ request.form.target_name }}" readonly>
 						<span class="focus-input100"></span>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="cat_target" placeholder="sex, race" value="{{ request.form.cat_target }}">
+						<p>Sensitive attributes: </p>
+						<input class="input100" type="text" name="cat_target" placeholder="sex, race" value="{{ request.form.cat_target }}" readonly>
 						<span class="focus-input100"></span>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="num_target" placeholder="age, hours-per-week" value="{{ request.form.num_target }}">
+						<p>Numerical attributes: </p>
+						<input class="input100" type="text" name="num_target" placeholder="age, hours-per-week" value="{{ request.form.num_target }}" readonly>
 						<span class="focus-input100"></span>
 					</div>
 
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="perform_target" placeholder="PR" value="{{ request.form.perform_target }}">
+						<p>Performance measure: </p>
+						<input class="input100" type="text" name="perform_target" placeholder="PR" value="{{ request.form.perform_target }}" readonly>
 						<span class="focus-input100"></span>
 					</div>
-
+                                        <!--
 					<div class="flex-sb-m w-full p-t-3 p-b-24">
 						<div class="contact100-form-checkbox">
 							<input class="input-checkbox100" id="ckb1" type="checkbox" name="remember-me">
@@ -99,9 +106,9 @@
 							</label>
 						</div>
 					</div>
-
+					-->
 					<div class="container-login100-form-btn m-t-17">
-						<input class="login100-form-btn" type="submit" value="Login">
+						<input class="login100-form-btn" type="submit" value="Generate DAG">
 					</div>
 
 				</form>
@@ -130,4 +137,16 @@
 	<script src="/static/js/main.js"></script>
 
 </body>
+<style>
+::placeholder { /* Most modern browsers support this now. */
+   color:    #0D1A00;
+}
+textarea {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+}
+</style>
 </html>
