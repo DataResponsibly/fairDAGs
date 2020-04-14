@@ -1,0 +1,3 @@
+# store the mapping of numbered operations to acutal operations.
+{1: "raw_data=pd.read_csv(f_path,na_values='?',index_col=0)",
+ 2: "data=raw_data.dropna()"}
