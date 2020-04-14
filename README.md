@@ -1,5 +1,5 @@
 # fairDAGs
-This is the code repository for fairDAGs. 
+This is the code repository for fairDAGs. Check out our [web demo](https://dataresponsibly.hpc.nyu.edu/fairdags).
 
 ## Run fairDAGs locally
 
