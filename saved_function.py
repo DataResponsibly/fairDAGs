@@ -23,25 +23,23 @@ from sklearn.ensemble import RandomForestClassifier
 from utils import *
 from fairness_instru import *
 @tracer(cat_col = ['sex', 'race'], numerical_col = ['age', 'hours-per-week'], sensi_atts=['sex', 'race'], target_name = "income-per-year", training=True, save_path="experiments/webUI", dag_save="svg")
-def adult_pipeline_normal(f_path = 'data/adult_train.csv'):
-    data = pd.read_csv(f_path, na_values='?', index_col=0)
-#     data = raw_data.dropna()
+def adult_pipeline_easy(f_path = 'data/adult_train.csv'):
+
+    raw_data = pd.read_csv(f_path, na_values='?', index_col=0)
+
+    data = raw_data.dropna()
 
     labels = label_binarize(data['income-per-year'], ['>50K', '<=50K'])
 
-    nested_categorical_feature_transformation = Pipeline(steps=[
-        ('impute', SimpleImputer(missing_values=np.nan, strategy='most_frequent')),
-        ('encode', OneHotEncoder(handle_unknown='ignore'))
-    ])
-
-    nested_feature_transformation = ColumnTransformer(transformers=[
-        ('categorical', nested_categorical_feature_transformation, ['education', 'workclass']),
+    feature_transformation = ColumnTransformer(transformers=[
+        ('categorical', OneHotEncoder(handle_unknown='ignore'), ['education', 'workclass']),
         ('numeric', StandardScaler(), ['age', 'hours-per-week'])
     ])
 
-    nested_pipeline = Pipeline([
-      ('features', nested_feature_transformation),
-      ('classifier', DecisionTreeClassifier())])
 
-    return nested_pipeline
-pipeline = adult_pipeline_normal()
+    income_pipeline = Pipeline([
+        ('features', feature_transformation),
+        ('classifier', DecisionTreeClassifier())])
+
+    return income_pipeline
+pipeline = adult_pipeline_easy()
