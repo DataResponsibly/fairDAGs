@@ -5,11 +5,27 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 import re
+from graphviz import Digraph
+import plotly
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import json
+import re
+import uuid
 import math
 import seaborn as sns
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
 import plotly.express as px
+from functools import wraps
+from importlib import reload
+
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, label_binarize, KBinsDiscretizer
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 
 np.set_printoptions(precision = 4)
@@ -456,3 +472,71 @@ def draw_bar_plot(f_label, y_name, focus_atts, fig_title, performance_flag=False
         plt.savefig(save_path+"/images/"+fig_title+'_performance.png')
 
     plt.show()
+
+def int_to_string(n):
+    return n.to_bytes(math.ceil(n.bit_length() / 8), 'little').decode()
+
+def create_hist_sub_plot(to_plot, plt_titles, pos_group):
+    no_rows = len(to_plot)
+    # no_rows_plot = no_rows//2 if no_rows%2==0 else no_rows//2+1
+
+    fig = make_subplots(
+        rows=no_rows, cols=2, subplot_titles=np.array(plt_titles[:-1]).repeat(2).tolist()+[plt_titles[-1]]
+    )
+
+    for i, res in enumerate(to_plot):
+        if type(res) == tuple:
+            bar_list = plotly_histogram_perform(data = res[0], target = res[1], title = plt_titles[i])
+            for bar_trace in bar_list:
+                fig.add_trace(bar_trace, row=i+1, col = 1)
+        else:
+            bar_list, No_col = plotly_histogram(res, plt_titles[i], i==0, pos_group)
+            for j, bar_trace in enumerate(bar_list):
+                if j < No_col:
+                    fig.add_trace(bar_trace, row=i+1, col=1)
+                else:
+                    fig.add_trace(bar_trace, row=i+1, col=2)
+
+    for i in range(2 * no_rows):
+        fig.update_yaxes(title_text='Positive' if i%2==0 else 'Negative', row=i//2+1, col=i%2+1)
+
+    fig.update_layout(
+        legend = dict(
+            orientation = 'h',
+        ),
+        height = 450*no_rows,
+        font=dict(
+            family="Courier New, monospace",
+            size=24,
+            color="#7f7f7f"
+            )
+    )
+
+    graphJSON = json.dumps(fig, cls = plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
+
+def change_code_color(colors, titles, code):
+    code_list = code.split("\n")
+
+    for idx, line in enumerate(code_list):
+        if line.startswith("            "):
+            code_list[idx] = f"<p style=\"margin-left: 120px\">{line}</p>"
+        elif line.startswith("        "):
+            code_list[idx] = f"<p style=\"margin-left: 80px\">{line}</p>"
+        elif line.startswith("    "):
+            code_list[idx] = f"<p style=\"margin-left: 40px\">{line}</p>"
+        elif line=='\r':
+            code_list[idx] = f"<p></p>"
+        for i, title in enumerate(titles):
+            if '__' not in title or title.startswith('__'):
+                if title.strip("__") in line:
+                    code_list[idx] = f"<font color=\"{colors[i]}\">{code_list[idx]}</font>"
+            else:
+                # for sep in title.split("__"):
+                    # if sep in line and sep:
+                if title.split('__')[-2] in line:
+                    code_list[idx] = f"{code_list[idx].split(title.split('__')[-2])[0]}<font color=\"{colors[i]}\">{title.split('__')[-2]}</font>{code_list[idx].split(title.split('__')[-2])[-1]}"
+
+        code = "".join(code_list)
+
+    return code

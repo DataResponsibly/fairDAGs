@@ -30,11 +30,6 @@ from fairness_instru import *
 import warnings
 warnings.filterwarnings('ignore')
 
-pd.set_option('display.max_colwidth',1000)
-np.set_printoptions(precision = 4)
-pd.set_option("display.precision", 4)
-pd.set_option('expand_frame_repr', True)
-
 app = Flask(__name__)
 
 cache = []
@@ -67,6 +62,62 @@ from utils import *
 from fairness_instru import *
 """
 
+playdata_AD_normal = """def adult_pipeline_normal(f_path = 'data/adult_train.csv'):
+    data = pd.read_csv(f_path, na_values='?', index_col=0)
+#     data = raw_data.dropna()
+
+    labels = label_binarize(data['income-per-year'], ['>50K', '<=50K'])
+
+    nested_categorical_feature_transformation = Pipeline(steps=[
+        ('impute', SimpleImputer(missing_values=np.nan, strategy='most_frequent')),
+        ('encode', OneHotEncoder(handle_unknown='ignore'))
+    ])
+
+    nested_feature_transformation = ColumnTransformer(transformers=[
+        ('categorical', nested_categorical_feature_transformation, ['education', 'workclass']),
+        ('numeric', StandardScaler(), ['age', 'hours-per-week'])
+    ])
+
+    nested_pipeline = Pipeline([
+      ('features', nested_feature_transformation),
+      ('classifier', DecisionTreeClassifier())])
+
+    return nested_pipeline"""
+
+playdata_CM = """def compas_pipeline(f_path = 'data/compas_train.csv'):
+
+    data = pd.read_csv(f_path)
+
+    data = data[['sex', 'dob','age','c_charge_degree', 'race','score_text','priors_count','days_b_screening_arrest',
+                 'decile_score','is_recid','two_year_recid','c_jail_in','c_jail_out']]
+
+
+    data = data.loc[(data['days_b_screening_arrest'] <= 30)]
+    data = data.loc[(data['days_b_screening_arrest'] >= -30)]
+    data = data.loc[(data['is_recid'] != -1)]
+    data = data.loc[(data['c_charge_degree'] != "O")]
+    data = data.loc[(data['score_text'] != 'N/A')]
+
+    data = data.replace('Medium', "Low")
+
+    labels = LabelEncoder().fit_transform(data['score_text'])
+
+    #sklearn pipeline
+    impute1_and_onehot = Pipeline([('imputer1', SimpleImputer(strategy='most_frequent')),
+                                   ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+    impute2_and_bin = Pipeline([('imputer2', SimpleImputer(strategy='mean')),
+                                ('discretizer', KBinsDiscretizer(n_bins=4, encode='ordinal', strategy='uniform'))])
+    featurizer = ColumnTransformer(transformers=[
+            ('impute1_and_onehot', impute1_and_onehot, ['is_recid']),
+            ('impute2_and_bin', impute2_and_bin, ['age'])
+        ])
+
+    pipeline = Pipeline([
+        ('features', featurizer),
+        ('classifier', LogisticRegression())
+    ])
+    return pipeline"""
+
 # variable initilization
 target_name, pos_group, code, name, organization = "", "", "", "", ""
 num_target, cat_target = [], []
@@ -98,7 +149,7 @@ def login():
         global name
         name = request.form['name'] if request.form['name'] else 'Guest'
         global organization
-        organization = request.form['organization'] if request.form['organization'] else 'Unknown'\
+        organization = request.form['organization'] if request.form['organization'] else 'Unknown'
         global demo
         demo = request.form['demo']
         global code
@@ -149,6 +200,14 @@ def login():
             rand_rgb = pickle.load(open(f"playdata/{demo}/checkpoints/rand_color_train.p", 'rb'))
             plot_dict = pickle.load(open(f"playdata/{demo}/checkpoints/plot_dict_train.p", 'rb'))
             target_df = pickle.load(open(f"playdata/{demo}/checkpoints/target_df_train.p", 'rb'))
+
+            if demo =='AD_normal':
+                code = playdata_AD_normal
+            elif demo == 'CM':
+                code  = playdata_CM
+                target_name, pos_group = 'score_text', 'High'
+                cat_target = ['sex', 'race']
+                num_target = ['age']
 
             with open(f"playdata/{demo}/DAG/pipeline.svg", 'r') as content:
                 svg = content.read()
@@ -261,7 +320,7 @@ def home():
 
     code_with_color = change_code_color(corr_color, code_titles, code)
     template_to_render = user_id if demo=="USER" else demo
-    return render_template(f'{template_to_render}.html', svg = svg, plots = plots, tables = tables_to_display[::-1], titles = titles[::-1], labels = labels[::-1], colors = np.array(corr_color[::-1]).repeat(2).tolist(), code = code_with_color, name = name, org = organization)
+    return render_template(f'{template_to_render}.html', plots = plots, tables = tables_to_display[::-1], titles = titles[::-1], labels = labels[::-1], colors = np.array(corr_color[::-1]).repeat(2).tolist(), code = code_with_color, name = name, org = organization)
 
 @app.route('/logout')
 @login_required
@@ -271,4 +330,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-   app.run(debug=True)
+    app.run(debug=True)
