@@ -5,8 +5,6 @@
 
 # ## Preparations
 
-# In[1]:
-
 import os
 from collections import defaultdict
 import inspect
@@ -45,9 +43,8 @@ pd.set_option('expand_frame_repr', True)
 
 
 # Current Version
-# Current Version
 def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_name, training, save_path):
-
+    to_csv_count = 1
     log_dict = {}
     plot_dict = {}
     raw_func = inspect.getsource(pipeline_to_test)
@@ -58,13 +55,6 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
     for line in input_args:
         exec(line)
 
-    # print()
-    # print('####################### Start Pandas Opeation #######################')
-    # print()
-
-    ######################################
-    # Initialization
-    ######################################
     prev = {}
 
     numerical_metric_list = ['count', 'missing_count', 'median', 'mad', 'range']
@@ -89,7 +79,8 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
                 target_df = cur_line.split('=')[0].strip()
 
                 plot_dict[line_cleansing(cur_line)] = static_label(eval(target_df), sensi_atts, target_name)
-                eval(target_df).to_csv(save_path+'/checkpoints/csv/training/'+cur_line.replace('/', '').replace(' ','')+'.csv' if training else save_path+'/checkpoints/csv/testing/'+cur_line.replace('/', '').replace(' ','')+'.csv')
+                eval(target_df).to_csv(save_path+'/checkpoints/csv/training/o'+str(to_csv_count)+'.csv' if training else save_path+'/checkpoints/csv/testing/o'+str(to_csv_count)+'.csv')
+                to_csv_count+=1
 
                 col_list = eval(target_df).columns.tolist()
                 numerical_col_sub = [i for i in numerical_col if i in col_list]
@@ -122,11 +113,7 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
                     if len(numerical_col_sub) != 0:
                         numerical_dif = numerical_df - prev['numerical']
                         if (numerical_dif.values != 0).any():
-                            # print('*'*10)
-                            # print('Changes in numerical features!')
-                            # display(numerical_dif)
                             log_dict[line_cleansing(cur_line)] = {'num': numerical_dif}
-                            # print('*'*10)
 
                 ##################################
                 # ⬆️ numerical
@@ -136,19 +123,11 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
                         cat_dif = get_categorical_dif(cat_df, cat_metric_list, prev['categorical'])
                         cat_dif_flag = check_cat_dif(cat_dif)
                         if cat_dif_flag:
-                            # print('*'*10)
-                            # print('Changes in categorical features!')
-                            # display(cat_dif)
+
                             log_dict[line_cleansing(cur_line)] = {'cat':cat_dif}
-                            # print('*'*10)
 
                 print_bool = True
 
-                # if print_bool:
-                #     print('-------------------------------------------------------')
-                #     print(f'Inpected {cur_line}')
-                #     print('-------------------------------------------------------')
-                #     print()
 
                 # save the output for next round comparison
                 prev['numerical'] = numerical_df.copy()
@@ -184,11 +163,8 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
                 if len(numerical_col_sub) != 0:
                     numerical_dif = numerical_df - prev['numerical']
                     if (numerical_dif.values != 0).any():
-                        # print('*'*10)
-                        # print('Changes in numerical features!')
-                        # display(numerical_dif)
                         log_dict[line_cleansing(cur_line)] = {'num':numerical_dif}
-                        # print('*'*10)
+
 
             ##################################
             # ⬆️ numerical
@@ -198,19 +174,11 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
                     cat_dif = get_categorical_dif(cat_df, cat_metric_list, prev['categorical'])
                     cat_dif_flag = check_cat_dif(cat_dif)
                     if cat_dif_flag:
-                        # print('*'*10)
-                        # print('Changes in categorical features!')
-                        # display(cat_dif)
+
                         log_dict[line_cleansing(cur_line)] = {'cat':cat_dif}
-                        # print('*'*10)
+
 
             print_bool = True
-
-            # if print_bool:
-                # print('-------------------------------------------------------')
-                # print(f'Inpected {cur_line}')
-                # print('-------------------------------------------------------')
-                # print()
 
             # save the output for next round comparison
             prev['numerical'] = numerical_df.copy()
@@ -219,9 +187,7 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
 
     nested_graph = pipeline_to_dataflow_graph(eval(f'{outputs[0]}'))
 
-    # print()
     # print('####################### Start Sklearn Pipeline #######################')
-    # print()
 
     for item in nested_graph:
         ######################################################################################
@@ -237,7 +203,9 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
             # print('-------------------------------------------------------')
             # print()
             plot_dict[line_cleansing(f"{item.name}__{str(item.operation).split('(')[0]}")] = static_label(eval(target_df), sensi_atts, target_name)
-            eval(target_df).to_csv(save_path+'/checkpoints/csv/training/'+f"{item.name}__{str(item.operation).split('(')[0]}".replace('/', '').replace(' ','')+'.csv' if training else save_path+'/checkpoints/csv/testing/'+f"{item.name}__{str(item.operation).split('(')[0]}".replace('/', '').replace(' ','')+'.csv')
+            eval(target_df).to_csv(save_path+'/checkpoints/csv/training/o'+str(to_csv_count)+'.csv' if training else save_path+'/checkpoints/csv/testing/o'+str(to_csv_count)+'.csv')
+
+            to_csv_count+=1
             ##############################
             # Metrices Calculation
             ##############################
@@ -268,12 +236,10 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
                 eval(target_df)[item.name] = item.operation.fit_transform(eval(target_df)[item.name].values.reshape(-1,1)).toarray()
             except:
                 eval(target_df)[item.name] = item.operation.fit_transform(eval(target_df)[item.name].values.reshape(-1,1))
-            # print('-------------------------------------------------------')
-            # print(f"Operations {str(item.operation).split('(')[0]} on {item.name}")
-            # print('-------------------------------------------------------')
-            # print()
             plot_dict[line_cleansing(f"{item.name}__{str(item.operation).split('(')[0]}")] = static_label(eval(target_df), sensi_atts, target_name)
-            eval(target_df).to_csv(save_path+'/checkpoints/csv/training/'+f"{item.name}__{str(item.operation).split('(')[0]}".replace('/', '').replace(' ','')+'.csv' if training else save_path+'/checkpoints/csv/testing/'+f"{item.name}__{str(item.operation).split('(')[0]}".replace('/', '').replace(' ','')+'.csv')
+            eval(target_df).to_csv(save_path+'/checkpoints/csv/training/o'+str(to_csv_count)+'.csv' if training else save_path+'/checkpoints/csv/testing/o'+str(to_csv_count)+'.csv')
+            to_csv_count+=1
+
             ##############################
             # Metrices Calculation
             ##############################
@@ -296,11 +262,10 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
                 eval(target_df)[item.name] = item.operation.fit_transform(eval(target_df)[item.name].values.reshape(-1,1)).toarray()
             except:
                 pass
-                # print(item.operation)
-                # print(type(item.operation))
-                # eval(target_df)[item.name] = item.operation.fit_transform(eval(target_df)[item.name].values.reshape(-1,1))
             plot_dict[line_cleansing(f"{item.name}__{str(item.operation).split('(')[0]}")] = static_label(eval(target_df), sensi_atts, target_name)
-            eval(target_df).to_csv(save_path+'/checkpoints/csv/training/'+f"{item.name}__{str(item.operation).split('(')[0]}".replace('/', '').replace(' ','')+'.csv' if training else save_path+'/checkpoints/csv/testing/'+f"{item.name}__{str(item.operation).split('(')[0]}".replace('/', '').replace(' ','')+'.csv')
+            eval(target_df).to_csv(save_path+'/checkpoints/csv/training/o'+str(to_csv_count)+'.csv' if training else save_path+'/checkpoints/csv/testing/o'+str(to_csv_count)+'.csv')
+            to_csv_count+=1
+
         prev['numerical'] = numerical_df.copy()
         prev['categorical'] = cat_df.copy()
 
