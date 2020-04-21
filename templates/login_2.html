@@ -32,21 +32,21 @@
 	<div class="limiter">
 		<div class="container-login100">
 			<div class="wrap-login100 p-t-50 p-b-90">
-				<form class="login100-form validate-form flex-sb flex-w" action="" method="post">
+				<form class="login100-form validate-form flex-sb flex-w" action="" method="post" enctype=multipart/form-data>
 					<span class="login100-form-title p-b-51">
 						fair-DAGs
 					</span>
 
 					<label class="label100"> User: </label>
 					<div class="wrap-input100 m-b-16" data-validate = "Username is required">
-						<input class="input100" type="text" name="name" placeholder="Guest X" value="{{ request.form.name }}" readonly>
+						<input class="input100" type="text" name="name" placeholder="Guest X" value="{{ request.form.name }}" >
 						<span class="focus-input100"></span>
 					</div>
 
 
 					<label class="label100"> Organization: </label>
 					<div class="wrap-input100 m-b-16" data-validate = "Organization is required">
-						<input class="input100" type="text" name="organization" placeholder="Y University" value="{{ request.form.organization }}" readonly>
+						<input class="input100" type="text" name="organization" placeholder="Y University" value="{{ request.form.organization }}" >
 						<span class="focus-input100"></span>
 					</div>
 
@@ -82,30 +82,30 @@
 				        ('features', feature_transformation),
 				        ('classifier', DecisionTreeClassifier())])
 
-				    return income_pipeline" value="{{ request.form.code }}" readonly></textarea>
+				    return income_pipeline" value="{{ request.form.code }}"></textarea>
 					</div>
 
 					<label class="label100"> Target: </label>
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="target_name" placeholder="income-per-year, >50K" value="{{ request.form.target_name }}" readonly>
+						<input class="input100" type="text" name="target_name" placeholder="income-per-year, >50K" value="{{ request.form.target_name }}">
 						<span class="focus-input100"></span>
 					</div>
 
 					<label class="label100"> Sensitive Attributes: </label>
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="cat_target" placeholder="sex, race" value="{{ request.form.cat_target }}" readonly>
+						<input class="input100" type="text" name="cat_target" placeholder="sex, race" value="{{ request.form.cat_target }}">
 						<span class="focus-input100"></span>
 					</div>
 
 					<label class="label100"> Numerical Attributes: </label>
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="num_target" placeholder="age, hours-per-week" value="{{ request.form.num_target }}" readonly>
+						<input class="input100" type="text" name="num_target" placeholder="age, hours-per-week" value="{{ request.form.num_target }}">
 						<span class="focus-input100"></span>
 					</div>
 
 					<label class="label100"> Performance Measure: </label>
 					<div class="wrap-input100 m-b-16">
-						<input class="input100" type="text" name="perform_target" placeholder="PR" value="{{ request.form.perform_target }}" readonly>
+						<input class="input100" type="text" name="perform_target" placeholder="PR" value="{{ request.form.perform_target }}">
 						<span class="focus-input100"></span>
 					</div>
                                         <!--
@@ -118,12 +118,10 @@
 						</div>
 					</div>
 					-->
-					<!-- <div>
-					<label class="label100">If new test case, please upload data HERE </label>
-					<form action="/action_page.php">
-					  <input type="file" id="myfile" name="myfile"><br><br>
-					</form>
-				</div> -->
+					<div>
+					<label class="label100">If new test case, data HERE </label>
+					  <input type="file" id="file" name="file"><br><br>
+				</div>
 
 					<div class="container-login100-form-btn m-t-17">
 						<input class="login100-form-btn" type="submit" value="Generate DAG">

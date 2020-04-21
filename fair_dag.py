@@ -15,6 +15,7 @@ import re
 import uuid
 from functools import wraps
 from importlib import reload
+from werkzeug.utils import secure_filename
 
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, label_binarize, KBinsDiscretizer
 from sklearn.compose import ColumnTransformer
@@ -35,6 +36,8 @@ app = Flask(__name__)
 cache = []
 
 user_id = uuid.uuid1()
+
+# uploads_dir = os.path.join(app.instance_path, 'media')
 
 essentials = """import os
 from collections import defaultdict
@@ -147,9 +150,9 @@ def login():
     # set default_value here
     if request.method == 'POST':
         global name
-        name = request.form['name'] if request.form['name'] else 'Guest'
+        name = request.form['name'] if request.form['name'] else 'Guest X'
         global organization
-        organization = request.form['organization'] if request.form['organization'] else 'Unknown'
+        organization = request.form['organization'] if request.form['organization'] else 'Y university'
         global demo
         demo = request.form['demo']
         global code
@@ -192,6 +195,9 @@ def login():
         global plot_dict
         global target_df
 
+        to_json_dict = request.form.to_dict(flat=False)
+        with open(f'media/{user_id}.json', 'w+') as f:
+            json.dump(to_json_dict, f)
 
         flash('You were just logged in')
         if not demo == 'USER':
@@ -219,8 +225,21 @@ def login():
                 f.write("{% endblock %}\n")
             return redirect(url_for('home'))
 
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected File')
+            return redirect(url_for('logged_in'))
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(f'media/{user_id}.csv')
 
         function_title = code.split('(')[0].replace('def ','')+"()"
+        input_args = code.split('(')[1].split(')')[0].split(',')
+        for i, item in enumerate(input_args):
+            if 'f_path' in item:
+                input_args[i] = f'f_path = \"./media/{user_id}.csv\"'
+        input_arg = ','.join(input_args)
+        code = ''.join([code.split('(')[0], '(', input_arg, ')', ')'.join(code.split(')')[1:])])
         with open(f'{user_id}.py', 'w+') as f:
             f.write(essentials)
             f.write(f"""@tracer(cat_col = {cat_target}, numerical_col = {num_target}, sensi_atts={cat_target}, target_name = \"{target_name}\", training=True, save_path=\"{save_path}\", dag_save=\"svg\")\n{code}\n""")
