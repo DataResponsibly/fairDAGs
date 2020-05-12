@@ -182,6 +182,20 @@ iframe {
 }
 
 
+/* label */
+
+.label100 {
+  font-family: Ubuntu-Bold;
+  color: #403866;
+  line-height: 1.0;
+  font-size: 18px;
+
+  display: block;
+  width: 100%;
+  background: transparent;
+  height: 30px;
+  padding: 0 20px 0 38px;
+}
 
 /*------------------------------------------------------------------
 [ Input ]*/
