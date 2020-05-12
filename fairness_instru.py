@@ -44,6 +44,24 @@ pd.set_option('expand_frame_repr', True)
 
 # Current Version
 def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_name, training, save_path):
+    """
+    Generates intermediate dicts. saved in dataframe format.
+
+    args:
+        pipeline_to_test: pipeline code to be tested. String.
+        cat_col: catagorical attributes used for tracing changes. String.
+        numerical_col: numerical attributes used for tracing changes. String.
+        sensi_atts: sensible attributes used to generate static labels. String.
+        target_name: target attributes. String.
+        training: Indicator for training session. False to be testing. Used for classifier train/val. Bool.
+        save_path: save_path specified to save intermediate dict files. String.
+
+    return:
+        log_dict: dictionary saving all intermediate results(pandas dataframe).
+        plot_dict: dictionary saving all data used for histogram plotting.
+        eval(target_df): dataframe after all pandas & sklearn operations.
+        clf: classifier.
+    """
     to_csv_count = 1
     log_dict = {}
     plot_dict = {}
@@ -292,6 +310,15 @@ def describe_ver(pipeline_to_test, cat_col, numerical_col, sensi_atts, target_na
 # In[405]:
 
 def find_pd_lines(pipeline_func):
+    """
+    function used for extract pandas operations from raw pipeline codes.
+
+    args:
+        pipeline_func: raw pipeline codes. String.
+
+    return:
+        rows including pandas operations.
+    """
     pipeline_func = inspect.getsource(pipeline_func)
     pd_lines = []
     input_args , executable_list, _ = func_aggregation(pipeline_func)
@@ -309,6 +336,19 @@ def find_pd_lines(pipeline_func):
     return pd_lines
 
 def pd_to_dataflow_graph(pipeline_func, log_list, parent_vertices=[]):
+    """
+    Function translating pandas operations to DAGs.
+
+    args:
+        pipeline_func: raw pipeline codes. String.
+        log_list: log_list storing all operation identifiers. List.
+        parent_vertices: parent nodes. default to be None. No operations before pandas. List.
+
+    return:
+        graph: list of nodes in the eligible format from graphviz.
+        previous: last node used for parent node of sklearn part.
+        log_list: log_list storing all operation identifiers.
+    """
     executable_list = find_pd_lines(pipeline_func)
     graph = []
     previous = []
@@ -390,6 +430,18 @@ def pd_to_dataflow_graph(pipeline_func, log_list, parent_vertices=[]):
 
 
 def sklearn_to_dataflow_graph(pipeline, log_list, parent_vertices=[]):
+    """
+    Function translating sklearn operations to DAGs.
+
+    args:
+        pipeline_func: raw pipeline codes. String.
+        log_list: log_list storing all operation identifiers. List.
+        parent_vertices: parent nodes. default to be None. No operations before pandas. List.
+
+    return:
+        graph: list of nodes in the eligible format from graphviz.
+        log_list: log_list storing all operation identifiers.
+    """
     graph = pipeline_to_dataflow_graph_full(pipeline)
     graph_dict = pipeline_to_dataflow_graph(pipeline)
     for node in graph_dict:
@@ -400,6 +452,19 @@ def sklearn_to_dataflow_graph(pipeline, log_list, parent_vertices=[]):
     return graph, log_list
 
 def visualize(nested_graph, log_list, save_path, dag_save):
+    """
+    Use graphvis to generate DAGs from graph list generated from pandas_to_dataflow_graph and sklearn_to_dataflow_graph.
+
+    args:
+        nested_graph: graph list generated from pandas_to_dataflow_graph and sklearn_to_dataflow_graph. List.
+        log_list: log_list storing all operation identifiers. List.
+        save_path: path used for saving DAG. String.
+        dag_save: format of DAG to be saved. String.
+
+    return:
+        dot: graphviz DAG object.
+        rand_rgb: color list storing the sequence of color used for DAG nodes.
+    """
     no_nodes = len(log_list)
     rand_rgb = ['#191970', '#ff0000', '#006400', '#32cd32', '#ffd700', '#9932cc', '#ff69b4', '#8b4513', '#00ced1', '#d2691e'] if no_nodes <= 10 else ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(no_nodes)]
     dot = Digraph(comment='preprocessing_pipeline')
@@ -424,6 +489,22 @@ def visualize(nested_graph, log_list, save_path, dag_save):
 
 
 def tracer(cat_col, numerical_col, sensi_atts, target_name, training = True, save_path = '', dag_save = 'pdf'):
+    """
+    combines describe_ver(generate intermediate dict) and visualize(DAG generation).
+
+    args:
+        cat_col: catagorical attributes used for tracing changes. String.
+        numerical_col: numerical attributes used for tracing changes. String.
+        sensi_atts: sensible attributes used to generate static labels. String.
+        target_name: target attributes. String.
+        training: Indicator for training session. False to be testing. Used for classifier train/val. Bool.
+        save_path: save_path specified to save intermediate dict files. String.
+        dag_save: format of DAG to be saved. String.
+
+    return:
+        function wrapper. all outputs saved to save_path using pickle.
+
+    """
     def wrapper(func):
         def call(*args, **kwargs):
             if not os.path.exists('experiments'):
@@ -438,6 +519,7 @@ def tracer(cat_col, numerical_col, sensi_atts, target_name, training = True, sav
                 os.mkdir(save_path+'/checkpoints/csv/training')
             if not training and not os.path.exists(save_path+'/checkpoints/csv/testing'):
                 os.mkdir(save_path+'/checkpoints/csv/testing')
+
             log_dict, plot_dict, target_df, clf = describe_ver(func, cat_col, numerical_col, sensi_atts, target_name, training, save_path)
             pickle.dump(clf, open(save_path+"/checkpoints/clf.p", "wb"))
             if training:

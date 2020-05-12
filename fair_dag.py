@@ -39,6 +39,11 @@ user_id = uuid.uuid1()
 
 # uploads_dir = os.path.join(app.instance_path, 'media')
 
+
+# variable essentials are package import commands that are written to function python file.
+#
+# function python file is excutable scripts that calls fairness_instru and then generates DAGs and intermediate log dicts, which is stored in pickle format.
+
 essentials = """import os
 from collections import defaultdict
 import inspect
@@ -65,6 +70,8 @@ from utils import *
 from fairness_instru import *
 """
 
+# Play data pipeline codes that generates ADULT_NORMAL case
+
 playdata_AD_normal = """def adult_pipeline_normal(f_path = 'data/adult_train.csv'):
     data = pd.read_csv(f_path, na_values='?', index_col=0)
 #     data = raw_data.dropna()
@@ -86,6 +93,8 @@ playdata_AD_normal = """def adult_pipeline_normal(f_path = 'data/adult_train.csv
       ('classifier', DecisionTreeClassifier())])
 
     return nested_pipeline"""
+
+# Play data pipeline that generates codes case
 
 playdata_CM = """def compas_pipeline(f_path = 'data/compas_train.csv'):
 
@@ -130,12 +139,18 @@ log_dict = {}
 plot_dict = {}
 rand_rgb = {}
 
-# flask secret_key
+# flask secret_key, randomly generated
 app.secret_key = "shdgfashfasdsfsdf"
 
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
+
+        """
+        Function checking the login status of user.
+        If no login status, redirect to login package
+        """
+
         if 'logged_in' in session:
             return f(*args, **kwargs)
         else:
@@ -145,6 +160,19 @@ def login_required(f):
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    """
+    Login Page Flask function
+
+    In Login page:
+        takes in user information.
+        dropdown menu for user to select play data
+        upload function for data upload if new case specified by user
+
+    Returns:
+        url for login page. Redirect to main home page if valid login session
+        write pipeline code to executable function python file which calls fairness_instru wrapper generating DAGs and intermediate log dict files
+        load intermediate dicts as well as DAG(stored in svg) and parse them to main home page
+    """
     error = None
 
     # set default_value here
@@ -188,6 +216,7 @@ def login():
 
         session['logged_in'] = True
 
+        # cache is used for stacking user click event, so that figures will show in sequence
         global cache
         cache = []
         global log_dict
@@ -195,11 +224,15 @@ def login():
         global plot_dict
         global target_df
 
+        # to_json_dict stores all user entered info, saved in uid format
         to_json_dict = request.form.to_dict(flat=False)
         with open(f'media/{user_id}.json', 'w+') as f:
             json.dump(to_json_dict, f)
 
         flash('You were just logged in')
+
+        # options for dsiplaying play data cases
+        # load saved play data intermediate dict files generated from fairness_instru
         if not demo == 'USER':
             log_dict = pickle.load(open(f"playdata/{demo}/checkpoints/log_dict_train.p", 'rb'))
             rand_rgb = pickle.load(open(f"playdata/{demo}/checkpoints/rand_color_train.p", 'rb'))
@@ -225,6 +258,13 @@ def login():
                 f.write("{% endblock %}\n")
             return redirect(url_for('home'))
 
+        # below handles user defined cases. including:
+        # save to executable function python file which generates DAGs and intermediate dict files
+        # load intermediate dict files
+        # load dags
+        # parse intermediate dict and DAGs to main home page
+
+        # laod user uploaded file
         file = request.files['file']
         if file.filename == '':
             flash('No selected File')
@@ -233,6 +273,7 @@ def login():
             filename = secure_filename(file.filename)
             file.save(f'media/{user_id}.csv')
 
+        # pipeline codes to be outputed into executable function python file. Extract pipeline function title first.
         function_title = code.split('(')[0].replace('def ','')+"()"
         input_args = code.split('(')[1].split(')')[0].split(',')
         for i, item in enumerate(input_args):
@@ -240,6 +281,8 @@ def login():
                 input_args[i] = f'f_path = \"./media/{user_id}.csv\"'
         input_arg = ','.join(input_args)
         code = ''.join([code.split('(')[0], '(', input_arg, ')', ')'.join(code.split(')')[1:])])
+
+        # write essentials and pipeline codes to executable function python file. add trace wrapper above function declare line.
         with open(f'{user_id}.py', 'w+') as f:
             f.write(essentials)
             f.write(f"""@tracer(cat_col = {cat_target}, numerical_col = {num_target}, sensi_atts={cat_target}, target_name = \"{target_name}\", training=True, save_path=\"{save_path}\", dag_save=\"svg\")\n{code}\n""")
@@ -256,6 +299,7 @@ def login():
             f.write('\n')
             f.write("{% endblock %}\n")
 
+        # load saved intermediate dict files generated from executable function python file.
         log_dict = pickle.load(open(save_path+"/checkpoints/log_dict_train.p", 'rb'))
         rand_rgb = pickle.load(open(save_path+"/checkpoints/rand_color_train.p", 'rb'))
         rand_rgb = pickle.load(open(save_path+"/checkpoints/rand_color_train.p", 'rb'))
@@ -268,7 +312,19 @@ def login():
 @app.route('/', methods=['GET'])
 @login_required
 def home():
-    # print("code"+code)
+    """
+    Main Function Flask function
+
+    html adopts hierachical format. child html file takes care of DAG visualization while parent html deals with dynamic changes in codes, dag color, tables and histograms.
+    In Main home page:
+        Display user information in head row
+        Display raw pipeline code. Change color w.r.t click events
+        Display DAG generated from pipeline code. Change color w.r.t click events
+        Display intermediate changes in both static lables and population stats
+        Display visualization of changes in static lables and performance labels
+    Returns:
+        url for main home page.
+    """
 
     selected_status = request.args.get('type')
     if selected_status is not None:
@@ -278,7 +334,11 @@ def home():
     plots = {}
     to_plot = []
     code_with_color = ""
+
+    # variable initilization
     tables_to_display, titles, labels, code_titles, plt_xs, plt_ys, plt_titles, plt_xas, plt_yas, plot_log_changes = [], [], [], [], [], [], [], [], [], []
+
+    # cache is used to store user click events
     for status in cache:
         if 'Classifier' in int_to_string(int(status)):
             label_inverse = {1: '<=50K', 0:'>50K'}
@@ -291,6 +351,8 @@ def home():
         else:
             to_plot.append(sort_dict_key(plot_dict[int(status)]))
             plot_log_changes.append(pd.DataFrame(sort_dict_key(plot_dict[int(status)])))
+
+        # display tables
         if int(status) in log_dict.keys():
             temp_table = log_dict[int(status)]
 
@@ -337,8 +399,11 @@ def home():
 
         plots = create_hist_sub_plot(to_plot[::-1], plt_titles[::-1], pos_group)
 
+    # change code color w.r.t click events
     code_with_color = change_code_color(corr_color, code_titles, code)
     template_to_render = user_id if demo=="USER" else demo
+
+    # parse variables to html file.
     return render_template(f'{template_to_render}.html', plots = plots, tables = tables_to_display[::-1], titles = titles[::-1], labels = labels[::-1], colors = np.array(corr_color[::-1]).repeat(2).tolist(), code = code_with_color, name = name, org = organization)
 
 @app.route('/logout')

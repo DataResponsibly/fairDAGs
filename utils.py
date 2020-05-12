@@ -30,8 +30,12 @@ from sklearn.metrics import confusion_matrix
 
 np.set_printoptions(precision = 4)
 pd.set_option("display.precision", 4)
+
 class DataFlowVertex:
     def __init__(self, parent_vertices, name, operation, params):
+        """
+        Data Vertex declaration from DSGA3001-Data Engineering homework.
+        """
         self.parent_vertices = parent_vertices
         self.name = name
         self.operation = operation
@@ -45,7 +49,16 @@ class DataFlowVertex:
 
 
 def line_cleansing(line):
+    """
+    Function used to convert sting to unique integer identifier.
+    """
     return int.from_bytes(line.encode(), 'little')
+
+def int_to_string(n):
+    """
+    Function used to convert integer to correspoding String.
+    """
+    return n.to_bytes(math.ceil(n.bit_length() / 8), 'little').decode()
 
 def sort_dict_key(dict):
     new_dict = {}
@@ -61,6 +74,9 @@ def remove_list_dup(sample_list):
     return res
 
 def plotly_histogram(res, title, ind, pos_group):
+    """
+    Function used to convert data list to html-ready plotly histogram.
+    """
     colors = px.colors.qualitative.Plotly
     primary_key = remove_list_dup([item[0] for item in res.keys()])
     names = remove_list_dup([item[1] for item in res.keys()])
@@ -85,6 +101,9 @@ def plotly_histogram(res, title, ind, pos_group):
     return bars, len(ys_pos)
 
 def plotly_histogram_perform(data, target, title):
+    """
+    Function used to convert performance label to html-ready plotly histogram.
+    """
     colors = px.colors.qualitative.Plotly
     primary_key = remove_list_dup([item[0] for item in data.keys()])
     names = remove_list_dup([item[1] for item in data.keys()])
@@ -169,6 +188,18 @@ def search_vertex_by_names(names, vertices_list):
     return result
 
 def static_label(data, sensi_atts, target_name):
+    """
+    Function used for static label generation.
+
+    args:
+        data: raw input data. pandas dataframe.
+        sensi_atts: sensible attributes used to generate static labels. String.
+        target_name: target attributes. String.
+
+    return:
+        res: dictionaty storing categories to static labels.
+    """
+
     groupby_cols = sensi_atts+[target_name]
     placeholder_att = list(set(data.columns).difference(groupby_cols))[0]
     pivot_data = data.pivot_table(index=sensi_atts,
@@ -388,7 +419,20 @@ def compute_evaluation_metric_binary(true_y, pred_y, label_order):
                 F1=2*TP / (2*TP+FP+FN) if (2*TP+FP+FN) > 0.0 else np.float64(0.0)
             )
 def get_performance_label(df, sensi_atts, target_name, posi_target, output_metrics=["TPR", "FPR", "TNR", "FNR", "PR"], round_digit=3):
+    """
+    Function used for performance label generation.
 
+    args:
+        df: raw input data. pandas dataframe.
+        sensi_atts: sensible attributes used to generate static labels. String.
+        target_name: target attributes. String.
+        posi_target: category in target_col which is specified to be positive group. String.
+        output_metrics: evaluation metrics used. Including TPR, FPR, TNR, FNR and PR. List of Strings.
+        round_digits: number of digits after rounding. Int.
+
+    return:
+        res_dict: dictionaty storing categories to performance labels.
+    """
     groupby_cols = sensi_atts+[target_name]
     placeholder_att = list(set(df.columns).difference(groupby_cols))[0]
 
@@ -421,6 +465,7 @@ def autolabel(rects, ax, font_size):
                     xytext=(0, 3),  # 3 points vertical offset
                     textcoords="offset points",
                     ha='center', va='bottom')
+
 
 def draw_bar_plot(f_label, y_name, focus_atts, fig_title, performance_flag=False, export_images = False, save_path = ''):
 
@@ -473,9 +518,6 @@ def draw_bar_plot(f_label, y_name, focus_atts, fig_title, performance_flag=False
 
     plt.show()
 
-def int_to_string(n):
-    return n.to_bytes(math.ceil(n.bit_length() / 8), 'little').decode()
-
 def create_hist_sub_plot(to_plot, plt_titles, pos_group):
     no_rows = len(to_plot)
     # no_rows_plot = no_rows//2 if no_rows%2==0 else no_rows//2+1
@@ -516,6 +558,9 @@ def create_hist_sub_plot(to_plot, plt_titles, pos_group):
     return graphJSON
 
 def change_code_color(colors, titles, code):
+    """
+    Function used for code color changing in main home heml page w.r.t user's click events.
+    """
     code_list = code.split("\n")
 
     for idx, line in enumerate(code_list):
