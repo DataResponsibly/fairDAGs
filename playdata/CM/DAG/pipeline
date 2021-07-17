@@ -1,0 +1,29 @@
+// preprocessing_pipeline
+digraph {
+	data [label=<<font POINT-SIZE="14"><b>data</b></font><br/><font POINT-SIZE="10">read_csv</font>> color="#6B9FD2" fontcolor="#6B9FD2" href="{{url_for('home', type=66540132039620480506336715297403664891364387801782690642157924)}}"]
+	"select 'sex', 'dob','age','c_charge_degree', 'race','score_text','priors_count','days_b_screening_arrest','decile_score','is_recid','two_year_recid','c_jail_in','c_jail_out'" [label=<<font POINT-SIZE="14"><b>select 'sex', 'dob','age','c_charge_degree', 'race ...</b></font><br/><font POINT-SIZE="10">filter</font>> color="#116E52" fontcolor="#116E52" href="{{url_for('home', type=2840355259597598387773378114481693776625355495780235700455539235026101098167759737117017436459694016448371630988060917540427915579567165666328544005719785137073969246835524456589145476753993634155110067595989049160649041122900830938529670074918249535393643640791772062703995055913679718703177714012920386232007745287271119325181350469034120421073718166825909780175693192088131018183051906487536154410410222574814087293584139009314283876)}}"]
+	data -> "select 'sex', 'dob','age','c_charge_degree', 'race','score_text','priors_count','days_b_screening_arrest','decile_score','is_recid','two_year_recid','c_jail_in','c_jail_out'"
+	"select data['days_b_screening_arrest'] <= 30" [label=<<font POINT-SIZE="14"><b>select data['days_b_screening_arrest'] &le; 30 ...</b></font><br/><font POINT-SIZE="10">filter</font>> color="#02DF96" fontcolor="#02DF96" href="{{url_for('home', type=264503686294678488214841154133877077488834796901626887410932970176976468887764388126815084181098115807436062148153869631969849586770276)}}"]
+	"select 'sex', 'dob','age','c_charge_degree', 'race','score_text','priors_count','days_b_screening_arrest','decile_score','is_recid','two_year_recid','c_jail_in','c_jail_out'" -> "select data['days_b_screening_arrest'] <= 30"
+	"select data['days_b_screening_arrest'] >= -30" [label=<<font POINT-SIZE="14"><b>select data['days_b_screening_arrest'] &ge; -30 ...</b></font><br/><font POINT-SIZE="10">filter</font>> color="#B34F81" fontcolor="#B34F81" href="{{url_for('home', type=67712943693618519506500393952140200182936174972350794118868041085469438603190768592827931762486128896552251779573932239596299878533456228)}}"]
+	"select data['days_b_screening_arrest'] <= 30" -> "select data['days_b_screening_arrest'] >= -30"
+	"select data['is_recid'] != -1" [label=<<font POINT-SIZE="14"><b>select data['is_recid'] != -1</b></font><br/><font POINT-SIZE="10">filter</font>> color="#1A0B63" fontcolor="#1A0B63" href="{{url_for('home', type=198990488795768573345010455899835631958305337275413276130079726916483836528851872890338107825873252)}}"]
+	"select data['days_b_screening_arrest'] >= -30" -> "select data['is_recid'] != -1"
+	"select data['c_charge_degree'] != \"O\"" [label=<<font POINT-SIZE="14"><b>select data['c_charge_degree'] != "O"</b></font><br/><font POINT-SIZE="10">filter</font>> color="#3D01AF" fontcolor="#3D01AF" href="{{url_for('home', type=3670717681382153490853954474520307483639173822802230849036656190033243276556407285179371618672774341304903352783757668)}}"]
+	"select data['is_recid'] != -1" -> "select data['c_charge_degree'] != \"O\""
+	"select data['score_text'] != 'N/A'" [label=<<font POINT-SIZE="14"><b>select data['score_text'] != 'N/A'</b></font><br/><font POINT-SIZE="10">filter</font>> color="#DA135B" fontcolor="#DA135B" href="{{url_for('home', type=218792000696538125428805182117922219668900496155949077297570192936129690388183376096982963060841025094622142820)}}"]
+	"select data['c_charge_degree'] != \"O\"" -> "select data['score_text'] != 'N/A'"
+	"replace 'Medium', \"Low\"" [label=<<font POINT-SIZE="14"><b>replace 'Medium', "Low"</b></font><br/><font POINT-SIZE="10">replace</font>> color="#C31E8D" fontcolor="#C31E8D" href="{{url_for('home', type=79910975671068123831408174180948020850093319641418023829783749420445690625880453570916)}}"]
+	"select data['score_text'] != 'N/A'" -> "replace 'Medium', \"Low\""
+	is_recid__imputer1 [label=<<font POINT-SIZE="14"><b>is_recid__imputer1</b></font><br/><font POINT-SIZE="10">SimpleImputer</font>> color="#7797EF" fontcolor="#7797EF" href="{{url_for('home', type=10956989519653340189613885826783714063989795120931107689)}}"]
+	"replace 'Medium', \"Low\"" -> is_recid__imputer1
+	is_recid__onehot [label=<<font POINT-SIZE="14"><b>is_recid__onehot</b></font><br/><font POINT-SIZE="10">OneHotEncoder</font>> color="#A8F936" fontcolor="#A8F936" href="{{url_for('home', type=10956966101083374353752908296762841510869547040550908777)}}"]
+	is_recid__imputer1 -> is_recid__onehot
+	age__imputer2 [label=<<font POINT-SIZE="14"><b>age__imputer2</b></font><br/><font POINT-SIZE="10">SimpleImputer</font>> color="#B643B5" fontcolor="#B643B5" href="{{url_for('home', type=9965323915506214861683370897284216029276001)}}"]
+	"replace 'Medium', \"Low\"" -> age__imputer2
+	age__discretizer [label=<<font POINT-SIZE="14"><b>age__discretizer</b></font><br/><font POINT-SIZE="10">KBinsDiscretizer</font>> color="#B8F453" fontcolor="#B8F453" href="{{url_for('home', type=167190524600887984567364163078468580500411255187297)}}"]
+	age__imputer2 -> age__discretizer
+	classifier [label=<<font POINT-SIZE="14"><b>classifier</b></font><br/><font POINT-SIZE="10">LogisticRegression</font>> color="#ADDAD5" fontcolor="#ADDAD5" href="{{url_for('home', type=630473553583542239452707970686389292693204000607)}}"]
+	is_recid__onehot -> classifier
+	age__discretizer -> classifier
+}

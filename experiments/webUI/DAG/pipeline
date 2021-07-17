@@ -1,0 +1,19 @@
+// preprocessing_pipeline
+digraph {
+	raw_data [label=<<font POINT-SIZE="14"><b>raw_data</b></font><br/><font POINT-SIZE="10">read_csv</font>> color="#191970" fontcolor="#191970" href="{{url_for('home', type=7663961903631626391147042517516261971965599312644663884390880434298276598318640647740767276619281983903762002310520298740591162076998099314)}}"]
+	"dropna " [label=<<font POINT-SIZE="14"><b>dropna </b></font><br/><font POINT-SIZE="10">dropna</font>> color="#ff0000" fontcolor="#ff0000" href="{{url_for('home', type=1009184767075918434549347693407456556052777472136614011236)}}"]
+	raw_data -> "dropna "
+	education [label=<<font POINT-SIZE="14"><b>education</b></font><br/><font POINT-SIZE="10">OneHotEncoder</font>> color="#006400" fontcolor="#006400" href="{{url_for('home', type=2804983321877343834560744523971287426967505533951943205989)}}"]
+	"dropna " -> education
+	workclass [label=<<font POINT-SIZE="14"><b>workclass</b></font><br/><font POINT-SIZE="10">OneHotEncoder</font>> color="#32cd32" fontcolor="#32cd32" href="{{url_for('home', type=2804983321877343834560744523971287427060025224109459926903)}}"]
+	"dropna " -> workclass
+	age [label=<<font POINT-SIZE="14"><b>age</b></font><br/><font POINT-SIZE="10">StandardScaler</font>> color="#ffd700" fontcolor="#ffd700" href="{{url_for('home', type=2551120173458070662744608260310443926770509665)}}"]
+	"dropna " -> age
+	"hours-per-week" [label=<<font POINT-SIZE="14"><b>hours-per-week</b></font><br/><font POINT-SIZE="10">StandardScaler</font>> color="#9932cc" fontcolor="#9932cc" href="{{url_for('home', type=789533451938102534376245469086271046335388363348063413310934233776484200)}}"]
+	"dropna " -> "hours-per-week"
+	classifier [label=<<font POINT-SIZE="14"><b>classifier</b></font><br/><font POINT-SIZE="10">DecisionTreeClassifier</font>> color="#ff69b4" fontcolor="#ff69b4" href="{{url_for('home', type=2804985179480294331185063494415449153744646865719765786463)}}"]
+	education -> classifier
+	workclass -> classifier
+	age -> classifier
+	"hours-per-week" -> classifier
+}
