@@ -39,6 +39,7 @@ user_id = uuid.uuid1()
 
 # uploads_dir = os.path.join(app.instance_path, 'media')
 
+script_name = os.getenv('SCRIPT_NAME', '')
 
 # variable essentials are package import commands that are written to function python file.
 #
@@ -307,7 +308,7 @@ def login():
         target_df = pickle.load(open(save_path+"/checkpoints/target_df_train.p", 'rb'))
 
         return redirect(url_for('home'))
-    return render_template("login_2.html", error = error)
+    return render_template("login_2.html", error = error, script_name = script_name)
 
 @app.route('/', methods=['GET'])
 @login_required
@@ -404,7 +405,10 @@ def home():
     template_to_render = user_id if demo=="USER" else demo
 
     # parse variables to html file.
-    return render_template(f'{template_to_render}.html', plots = plots, tables = tables_to_display[::-1], titles = titles[::-1], labels = labels[::-1], colors = np.array(corr_color[::-1]).repeat(2).tolist(), code = code_with_color, name = name, org = organization)
+    return render_template(f'{template_to_render}.html', 
+        plots = plots, tables = tables_to_display[::-1], titles = titles[::-1], 
+        labels = labels[::-1], colors = np.array(corr_color[::-1]).repeat(2).tolist(), 
+        code = code_with_color, name = name, org = organization, script_name = script_name)
 
 @app.route('/logout')
 @login_required
