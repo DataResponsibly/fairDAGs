@@ -212,7 +212,7 @@ def static_label(data, sensi_atts, target_name):
     first_index = set([item[0] for item in list(pivot_data.index)])
     res = {}
     for idx in first_index:
-        sum_to_norm = pivot_data.loc[idx].sum().get_values()
+        sum_to_norm = pivot_data.loc[idx].sum().to_numpy()
         res.update({(idx, key): value for key, value in round(pivot_data.loc[idx]/sum_to_norm, 3).T.to_dict().items()})
     return res
 

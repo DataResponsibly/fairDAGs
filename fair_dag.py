@@ -151,7 +151,7 @@ def login_required(f):
         If no login status, redirect to login package
         """
 
-        if 'logged_in' in session:
+        if 'logged_in' in session and session['logged_in']:
             return f(*args, **kwargs)
         else:
             flash('You need to login first')

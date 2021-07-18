@@ -1,18 +1,20 @@
 # fairDAGs
-This is the code repository for fairDAGs. Check out our [web demo](https://dataresponsibly.hpc.nyu.edu/fairdags).
+This is the code repository for fairDAGs. Check out our [web demo](https://dataresponsibly.enginnering.nyu.edu/fairdags).
 
 ## Run fairDAGs locally
 
-Prerequisite: python >=  3.6
+1. Install [Anaconda](https://www.anaconda.com/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
 
-1. Download this repository and unzip it to your local machine.
-2. Use the following command to initiate the environment
+2. Download this repository and unzip it to your local machine.
 
-	`cd LOCAL_FOLDER/fairDAGs` <br>
-	`python -m venv venv` <br>
-	`source venv/bin/activate` <br>
-	`pip install -r requirements.txt` <br>
-	`python fair_dag.py` <br>
+3. Use the following command to initiate the environment.
 
-3. Access fairDAGs in the  browser at http://127.0.0.1:5000. 
+  ```bash
+  cd LOCAL_FOLDER/fairDAGs
+  conda env create -f environment.yml
+  conda activate fairDAGs
+  python fair_dag.py
+  ```
+
+4. Access fairDAGs in the  browser at http://127.0.0.1:5000. 
 
